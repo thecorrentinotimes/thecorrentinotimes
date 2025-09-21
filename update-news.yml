@@ -2,7 +2,7 @@ name: Update News  # Nombre del workflow: "Actualizar Noticias"
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Se ejecuta cada 6 horas automáticamente
+    - cron:  '*/5 * * * *'  # Se ejecuta cada 5 minutos automáticamente
   push:
     branches: [ main ]  # También se ejecuta al hacer push a main
 
