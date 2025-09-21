@@ -1,11 +1,11 @@
 name: Update News
 on:
   schedule:
-    - cron: '*/5 * * * *' # Cada 5 minutos
+    - cron: '*/5 * * * *'
   push:
     branches: [ main ]
 permissions:
-  contents: write  # Permite commit y push
+  contents: write
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -20,19 +20,21 @@ jobs:
         python-version: '3.x'
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
         pip install feedparser
-    - name: Verify script exists
-      run: ls -la generar_noticias.py || echo "Error: Script not found in root"
     - name: Generate noticias.html
       run: |
-        python generar_noticias.py || { echo "Error: Python script failed"; cat generar_noticias.py; exit 1; }
-        ls -la noticias.html || echo "Error: noticias.html not generated"
-    - name: Commit and push changes
+        python generar_noticias.py
+        [ -f noticias.html ] && echo "File generated" || { echo "Error: noticias.html not generated"; exit 1; }
+    - name: Commit and push
       run: |
         git config user.name "GitHub Action"
         git config user.email "action@github.com"
         git add noticias.html
-        git diff --quiet && echo "No changes to commit" || (git commit -m "Actualizar noticias RSS" && git push)
+        if [ -n "$(git status --porcelain)" ]; then
+          git commit -m "Actualizar noticias RSS"
+          git push
+        else
+          echo "No changes to commit"
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
