@@ -1,5 +1,6 @@
 name: Update News
 on:
+  workflow_dispatch:  # Habilita el botón "Run workflow"
   schedule:
     - cron: '*/5 * * * *'
   push:
@@ -19,22 +20,15 @@ jobs:
       with:
         python-version: '3.x'
     - name: Install dependencies
-      run: |
-        pip install feedparser
+      run: pip install feedparser
     - name: Generate noticias.html
       run: |
         python generar_noticias.py
-        [ -f noticias.html ] && echo "File generated" || { echo "Error: noticias.html not generated"; exit 1; }
+        if [ -f noticias.html ]; then echo "File generated"; else echo "Error: noticias.html not generated"; exit 1; fi
     - name: Commit and push
       run: |
         git config user.name "GitHub Action"
         git config user.email "action@github.com"
         git add noticias.html
-        if [ -n "$(git status --porcelain)" ]; then
-          git commit -m "Actualizar noticias RSS"
-          git push
-        else
-          echo "No changes to commit"
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        git commit -m "Actualizar noticias RSS" -a || echo "No changes"
+        git push
